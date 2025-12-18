@@ -1,0 +1,9 @@
+# Database variables
+db_name: dev_db
+db_user: dev_user
+db_password: DevPassword123
+db_root_password: RootPassword123   # Replace with a secure password
+
+# Application variables
+app_port: 5000
+nginx_port: 80

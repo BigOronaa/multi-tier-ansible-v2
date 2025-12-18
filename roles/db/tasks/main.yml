@@ -1,0 +1,37 @@
+- name: Install MySQL server
+  apt:
+    name: mysql-server
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Ensure MySQL service is running
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Ensure PyMySQL is available for Ansible MySQL modules
+  pip:
+    name: PyMySQL
+    executable: /usr/bin/pip3
+  become: yes
+
+- name: Create database
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  become: yes
+
+- name: Create database user
+  community.mysql.mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  become: yes

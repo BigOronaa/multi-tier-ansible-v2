@@ -1,0 +1,15 @@
+- hosts: nginx
+  become: yes
+  roles:
+    - nginx
+
+- hosts: app
+  become: yes
+  roles:
+    - app
+
+- hosts: db
+  become: yes
+  roles:
+    - db
+    

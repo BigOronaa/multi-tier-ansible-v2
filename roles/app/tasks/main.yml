@@ -1,0 +1,27 @@
+- name: Install Python3 and pip
+  apt:
+    name:
+      - python3
+      - python3-pip
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Copy Python app
+  copy:
+    src: files/app.py
+    dest: /home/ubuntu/app.py
+  become: yes
+
+- name: Install Flask
+  pip:
+    name: flask
+    executable: pip3
+  become: yes
+
+- name: Run Flask app
+  shell: "nohup python3 /home/ubuntu/app.py &"
+  args:
+    chdir: /home/ubuntu
+  become: yes
+
