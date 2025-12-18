@@ -22,9 +22,9 @@
   until: flask_install is succeeded
 
 - name: Run Flask app
-  shell: nohup python3 /home/ubuntu/myapp/app.py &
+  shell: nohup python3 /home/ubuntu/app.py &
   args:
-    chdir: /home/ubuntu/myapp
+    chdir: /home/ubuntu
   become: yes
   retries: 3
   delay: 5
