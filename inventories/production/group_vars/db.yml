@@ -1,0 +1,5 @@
+# Production database configuration
+db_name: prod_db
+db_user: prod_user
+db_password: Prod_Password123
+db_root_password: Prod_RootPassword123
