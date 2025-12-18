@@ -21,14 +21,13 @@ jobs:
       - name: Install Ansible and dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ansible
-          pip install community.mysql PyMySQL
+          pip install ansible PyMySQL
+          ansible-galaxy collection install community.mysql
 
       - name: Start SSH agent and add private key
-        uses: webfactory/ssh-agent@v0.9.0 
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: |
-            ${{ secrets.ANSIBLE_SSH_KEY }}
+          ssh-private-key: ${{ secrets.ANSIBLE_SSH_KEY }}
 
       - name: Add servers to known_hosts
         run: |
