@@ -1,0 +1,7 @@
+# Development database configuration
+db_name: dev_db
+db_user: dev_user
+db_password: DevPassword123
+db_root_password: RootPassword123
+
+

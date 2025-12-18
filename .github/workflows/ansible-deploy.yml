@@ -37,11 +37,4 @@ jobs:
           ssh-keyscan -H 54.226.103.173 >> ~/.ssh/known_hosts
 
       - name: Run Ansible Playbook
-        env:
-          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          ansible-playbook -i inventories/development/hosts.ini site.yml \
-            --extra-vars "db_root_password=$DB_ROOT_PASSWORD db_name=$DB_NAME db_user=$DB_USER db_password=$DB_PASSWORD"
+        run: ansible-playbook -i inventories/development/hosts.ini site.yml
