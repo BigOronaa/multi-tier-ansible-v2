@@ -73,4 +73,10 @@ jobs:
             Status: ${{ job.status }}
           to: ${{ github.actor }}@users.noreply.github.com  # GitHub email alias
           from: ${{ secrets.EMAIL_USERNAME }}
-          secure: true
+          secure: false  # Use STARTTLS on port 587
+
+
+          
+
+
+    
