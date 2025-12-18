@@ -56,3 +56,23 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      
+
+      - name: Send Email Notification
+        if: always()  # Ensures email is sent even if previous steps fail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_APP_PASSWORD }}
+          subject: "Ansible Deployment Notification - ${{ github.ref_name }}"
+          body: |
+            Workflow: ${{ github.workflow }}
+            Job: ${{ github.job }}
+            Run Number: ${{ github.run_number }}
+            Status: ${{ job.status }}
+          to: Katrinaheaton48@gmail.com  # Replace with the email you want the notification sent to
+          from: ${{ secrets.EMAIL_USERNAME }}
+          secure: true
+
