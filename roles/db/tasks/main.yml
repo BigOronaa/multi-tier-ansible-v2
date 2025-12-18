@@ -4,6 +4,10 @@
     state: present
     update_cache: yes
   become: yes
+  retries: 3
+  delay: 10
+  register: mysql_install
+  until: mysql_install is succeeded
 
 - name: Ensure MySQL service is running
   service:
@@ -11,27 +15,53 @@
     state: started
     enabled: yes
   become: yes
+  retries: 3
+  delay: 5
+  register: mysql_service
+  until: mysql_service is succeeded
 
 - name: Ensure PyMySQL is available for Ansible MySQL modules
   pip:
     name: PyMySQL
     executable: /usr/bin/pip3
   become: yes
+  retries: 3
+  delay: 5
+  register: pymysql_install
+  until: pymysql_install is succeeded
 
-- name: Create database
-  community.mysql.mysql_db:
-    name: "{{ db_name }}"
-    state: present
-    login_user: root
-    login_password: "{{ db_root_password }}"
-  become: yes
+- block:
+    - name: Create database
+      community.mysql.mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_password }}"
+      become: yes
+      retries: 3
+      delay: 5
+      register: db_create
+      until: db_create is succeeded
 
-- name: Create database user
-  community.mysql.mysql_user:
-    name: "{{ db_user }}"
-    password: "{{ db_password }}"
-    priv: "{{ db_name }}.*:ALL"
-    state: present
-    login_user: root
-    login_password: "{{ db_root_password }}"
-  become: yes
+    - name: Create database user
+      community.mysql.mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_password }}"
+      become: yes
+      retries: 3
+      delay: 5
+      register: db_user_create
+      until: db_user_create is succeeded
+
+  rescue:
+    - name: Remove partially created database if something fails
+      community.mysql.mysql_db:
+        name: "{{ db_name }}"
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_password }}"
+      become: yes

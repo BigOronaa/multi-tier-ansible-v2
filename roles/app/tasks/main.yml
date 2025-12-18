@@ -1,27 +1,32 @@
 - name: Install Python3 and pip
   apt:
-    name:
-      - python3
-      - python3-pip
+    name: "{{ item }}"
     state: present
     update_cache: yes
+  loop:
+    - python3
+    - python3-pip
   become: yes
-
-- name: Copy Python app
-  copy:
-    src: files/app.py
-    dest: /home/ubuntu/app.py
-  become: yes
+  retries: 3
+  delay: 10
+  register: python_install
+  until: python_install is succeeded
 
 - name: Install Flask
   pip:
     name: flask
     executable: pip3
-  become: yes
+  retries: 3
+  delay: 5
+  register: flask_install
+  until: flask_install is succeeded
 
 - name: Run Flask app
-  shell: "nohup python3 /home/ubuntu/app.py &"
+  shell: nohup python3 /home/ubuntu/myapp/app.py &
   args:
-    chdir: /home/ubuntu
+    chdir: /home/ubuntu/myapp
   become: yes
-
+  retries: 3
+  delay: 5
+  register: flask_run
+  until: flask_run is succeeded

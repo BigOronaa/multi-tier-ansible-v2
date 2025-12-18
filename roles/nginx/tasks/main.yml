@@ -3,12 +3,19 @@
     name: nginx
     state: present
     update_cache: yes
-  become: yes   # <-- Add this line
+  become: yes
+  retries: 3
+  delay: 10
+  register: nginx_install
+  until: nginx_install is succeeded
 
 - name: Ensure Nginx is running
   service:
     name: nginx
     state: started
     enabled: yes
-  become: yes   # <-- Add this line
-
+  become: yes
+  retries: 3
+  delay: 5
+  register: nginx_service
+  until: nginx_service is succeeded
