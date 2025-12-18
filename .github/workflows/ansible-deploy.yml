@@ -3,44 +3,56 @@ name: Ansible Deploy
 on:
   push:
     branches:
-      - staging
       - master
+      - staging
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # 🔹 Map GitHub Environment to branch
-    environment: ${{ github.ref_name }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set inventory based on branch
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Ansible and dependencies
         run: |
-          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
-            echo "INVENTORY=inventories/staging/hosts.ini" >> $GITHUB_ENV
-          elif [ "${GITHUB_REF_NAME}" = "main" ]; then
+          python -m pip install --upgrade pip
+          pip install ansible PyMySQL
+          ansible-galaxy collection install community.mysql
+
+      - name: Start SSH agent and add private key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ANSIBLE_SSH_KEY }}
+
+      - name: Add servers to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 54.145.6.253 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 3.84.197.121 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 54.226.103.173 >> ~/.ssh/known_hosts
+
+      - name: Set inventory file based on branch
+        id: inventory
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "master" ]; then
             echo "INVENTORY=inventories/production/hosts.ini" >> $GITHUB_ENV
+          elif [ "${GITHUB_REF_NAME}" = "staging" ]; then
+            echo "INVENTORY=inventories/staging/hosts.ini" >> $GITHUB_ENV
           else
             echo "Unsupported branch"
             exit 1
           fi
 
-      - name: Install Ansible
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
-
-      - name: Verify files exist (debug step)
-        run: |
-          pwd
-          ls -la
-          ls -la inventories/
-          ls -la inventories/staging || true
-          ls -la inventories/production || true
-
       - name: Run Ansible Playbook
-        run: |
-          ansible-playbook -i "$INVENTORY" site.yml
+        run: ansible-playbook -i $INVENTORY site.yml
+        env:
+          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
